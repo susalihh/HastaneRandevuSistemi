@@ -12,19 +12,22 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class RandevuActivity extends AppCompatActivity {
 
     Veritabani vt;
     Veritabani2 vt2;
     ArrayList<HashMap<String, String>> randevu_liste;
-    Button btnRandevuAl,btnRandevularim;
+    String[] hasta;
+    Button btnRandevuAl,btnRandevularim,btnBilgiler;
     CalendarView cv;
     Spinner spin1,spin2,spin3;
     ArrayAdapter adapter1,adapter2,adapter3,adapter4,adapter5,adapter6,adapter7,adapter8,adapter9,adapter10,adapter11,adapter12,adapter13;
@@ -41,7 +44,7 @@ public class RandevuActivity extends AppCompatActivity {
     String[] doktorkulak = {"Dr. Büşra","Dr. Seda"};
     String[] doktorortopedi = {"Dr. Buğra","Dr. Halil","Dr. Derya"};
     String[] doktorpsikiyatri = {"Dr. Burak","Dr. Asiye"};
-
+    String tmpTc,tmpAd,tmpSifre,tmpTel;
     String[] brans = {"BESLENME VE DİYET","BEYİN VE SİNİR CERRAHİSİ","ÇOCUK SAĞLIĞI VE HASTALIKLARI","DERMATOLOJİ (CİLDİYE)","FİZİKSEL TIP VE REHABİLİTASYON","GENEL CERRAHİ","GÖZ HASTALIKLARI","KARDİYOLOJİ","KULAK-BURUN-BOĞAZ HASTALIKLARI","ORTOPEDİ VE TRAVMATOLOJİ","PSİKİYATRİ"};
 
 
@@ -65,6 +68,7 @@ public class RandevuActivity extends AppCompatActivity {
 
         btnRandevuAl = findViewById(R.id.button6);
         btnRandevularim = findViewById(R.id.button7);
+        btnBilgiler = findViewById(R.id.button8);
         cv = findViewById(R.id.calendarView);
         spin1 = findViewById(R.id.spinner);
         spin2 = findViewById(R.id.spinner2);
@@ -243,6 +247,14 @@ public class RandevuActivity extends AppCompatActivity {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
+        vt = new Veritabani(this);
+        try {
+            vt.baglantiyiAc();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
         String hastatc = getIntent().getExtras().getString("hastatc");
         btnRandevuAl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -260,6 +272,37 @@ public class RandevuActivity extends AppCompatActivity {
             }
         });
 
+        btnBilgiler.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hasta = vt.hastaGetir(hastatc);
+                tmpSifre = hasta[0];
+                tmpAd = hasta[1];
+                tmpTel = hasta[2];
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(RandevuActivity.this);
+                builder.setCancelable(true);
+                final View customLayout = getLayoutInflater().inflate(R.layout.custom_dialog, null);
+                builder.setView(customLayout);
+                EditText t1 = customLayout.findViewById(R.id.et_text1);
+                EditText t2 = customLayout.findViewById(R.id.et_text2);
+                EditText t3 = customLayout.findViewById(R.id.et_text3);
+                EditText t4 = customLayout.findViewById(R.id.et_text4);
+                t1.setText(hastatc);
+                t2.setText(tmpSifre);
+                t3.setText(tmpAd);
+                t4.setText(tmpTel);
+                builder.setNegativeButton("GÜNCELLE", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        vt.guncelleHasta(hastatc,t2.getText().toString(),t3.getText().toString(),t4.getText().toString());
+                    }
+                });
+                builder.create().show();
+            }
+        });
+
         btnRandevularim.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -272,12 +315,6 @@ public class RandevuActivity extends AppCompatActivity {
                     tmpSaat = randevu_liste.get(i).get("saat");
                     randevular += (i+1)+") Doktor: "+tmpDoktor+"\nPolikinlik: "+tmpBrans+"\nTarih: "+tmpTarih+" "+tmpSaat+"\n";
                 }
-                //Kitapları Listeliyoruz ve bu listeye listener atıyoruz
-                //lv = (ListView) findViewById(R.id.list_view);
-
-                //adapter4 = new ArrayAdapter(this, R.layout.list_item, R.id.kitap_adi, kitap_adlari);
-                //lv.setAdapter(adapter4);
-
                 builder.setMessage(randevular);
                 builder.show();
             }

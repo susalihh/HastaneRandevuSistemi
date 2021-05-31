@@ -18,6 +18,7 @@ public class Veritabani2 {
     private VeritabaniHelper veritabanihelper;
     private SQLiteDatabase veritabanim;
 
+    // Randevu Tablosu
     private static final String DATABASE_TABLO = "randevular";
     public static final String RANDEVU_ID = "id";
     public static final String RANDEVU_HASTATC = "hastatc";
@@ -52,7 +53,7 @@ public class Veritabani2 {
         veritabanim.delete("randevular","id=?",new String[]{id});
     }
 
-    public List<String> doktorListele(){
+    public List<String> randevuListeGetir(){
         List<String> veriler = new ArrayList<String>();
         veritabanim  = veritabanihelper.getReadableDatabase();
         try {
@@ -76,22 +77,28 @@ public class Veritabani2 {
         return veriler;
     }
 
-    public ArrayList<HashMap<String, String>> randevular(){
-        veritabanim = veritabanihelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM " + DATABASE_TABLO;
-        Cursor cursor = veritabanim.rawQuery(selectQuery, null);
-        ArrayList<HashMap<String, String>> randevulist = new ArrayList<HashMap<String, String>>();
-        if (cursor.moveToFirst()) {
-            do {
-                HashMap<String, String> map = new HashMap<String, String>();
-                for(int i=0; i<cursor.getColumnCount();i++)
-                {
-                    map.put(cursor.getColumnName(i), cursor.getString(i));
-                }
-                randevulist.add(map);
-            } while (cursor.moveToNext());
+    public List<String> randevuAra(String hastatc){
+        List<String> veriler = new ArrayList<String>();
+        veritabanim  = veritabanihelper.getReadableDatabase();
+        try {
+            String selectQuery = "SELECT * FROM " + DATABASE_TABLO + " WHERE hastatc="+hastatc;
+            Cursor cursor = veritabanim.rawQuery(selectQuery, null);
+            while (cursor.moveToNext()){
+                veriler.add(cursor.getInt(0)
+                        + " - "
+                        + cursor.getString(1)
+                        + " - "
+                        + cursor.getString(2)
+                        + " - "
+                        + cursor.getString(3)
+                        + " - "
+                        + cursor.getString(4)
+                        + " - "
+                        + cursor.getString(5));
+            }
+        }catch (Exception e){
         }
-        return randevulist;
+        return veriler;
     }
 
     public ArrayList<HashMap<String, String>> randevuGetir(String hastatc){

@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class Veritabani {
@@ -77,6 +76,42 @@ public class Veritabani {
         }
         return veriler;
     }
+    public List<String> hastaAra(String hastatc){
+        List<String> veriler = new ArrayList<String>();
+        veritabanim  = veritabanihelper.getReadableDatabase();
+        try {
+            String selectQuery = "SELECT * FROM " + DATABASE_TABLO + " WHERE tc="+hastatc;
+            Cursor cursor = veritabanim.rawQuery(selectQuery, null);
+            while (cursor.moveToNext()){
+                veriler.add(cursor.getInt(0)
+                        + " - "
+                        + cursor.getString(1)
+                        + " - "
+                        + cursor.getString(2)
+                        + " - "
+                        + cursor.getString(3));
+            }
+        }catch (Exception e){
+        }
+        return veriler;
+    }
+
+    public String[] hastaGetir(String tc){
+
+        Cursor cursor = veritabanim.query("hastalar", null, " tc=?", new String[]{tc}, null, null, null);
+        if(cursor.getCount()<1)
+        {
+            cursor.close();
+            return null;
+        }
+        cursor.moveToFirst();
+        String sifre = cursor.getString(cursor.getColumnIndex("sifre"));
+        String adsoyad  = cursor.getString(cursor.getColumnIndex("adsoyad"));
+        String tel  = cursor.getString(cursor.getColumnIndex("telefon"));
+        String[] hasta = {sifre,adsoyad,tel};
+        cursor.close();
+        return hasta;
+    }
 
     public void silHastaKayit (String tc) {
         veritabanim.delete("hastalar","tc=?",new String[]{tc});
@@ -88,26 +123,6 @@ public class Veritabani {
         cvGuncelle.put(HASTA_TELEFON, telefonGuncelle);
         veritabanim.update("hastalar",cvGuncelle,"tc=?",new String[]{guncellenecekTc});
     }
-
-    public ArrayList<HashMap<String, String>> hastalar(){
-        veritabanim = veritabanihelper.getReadableDatabase();
-        String selectQuery = "SELECT * FROM " + DATABASE_TABLO;
-        Cursor cursor = veritabanim.rawQuery(selectQuery, null);
-        ArrayList<HashMap<String, String>> randevulist = new ArrayList<HashMap<String, String>>();
-        if (cursor.moveToFirst()) {
-            do {
-                HashMap<String, String> map = new HashMap<String, String>();
-                for(int i=0; i<cursor.getColumnCount();i++)
-                {
-                    map.put(cursor.getColumnName(i), cursor.getString(i));
-                }
-                randevulist.add(map);
-            } while (cursor.moveToNext());
-        }
-        veritabanim.close();
-        return randevulist;
-    }
-
 
     private static class VeritabaniHelper extends SQLiteOpenHelper {
         public VeritabaniHelper(Context contextim) {
