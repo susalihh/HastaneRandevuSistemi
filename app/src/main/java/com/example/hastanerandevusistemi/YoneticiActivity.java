@@ -6,12 +6,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.database.SQLException;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+
 import java.util.List;
 
 public class YoneticiActivity extends AppCompatActivity {
@@ -20,6 +23,7 @@ public class YoneticiActivity extends AppCompatActivity {
     Veritabani2 vt2;
     ListView lv;
     Spinner spin1;
+    EditText t1;
     String tmpTc,tmpSifre,tmpAd,tmpTel,tmpId,tmphastatc,tmpdoktor,tmpbrans,tmptarih,tmpsaat;
     boolean tmp = true;
     ArrayAdapter adapter1;
@@ -29,6 +33,7 @@ public class YoneticiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_yonetici);
 
+        t1 = findViewById(R.id.tcText3);
         spin1 = findViewById(R.id.spinner4);
         lv = findViewById(R.id.listView1);
 
@@ -58,13 +63,51 @@ public class YoneticiActivity extends AppCompatActivity {
                 }
                 else{
                     tmp = false;
-                    doktorListele();
+                    randevuListele();
                     ListViewItem();
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        t1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    if (tmp == true){
+                        String hastatc = t1.getText().toString();
+                        List<String> list = vt1.hastaAra(hastatc);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(YoneticiActivity.this, android.R.layout.simple_list_item_1,android.R.id.text1,list);
+                        lv.setAdapter(adapter);
+                        if (t1.length() == 0)
+                            hastaListele();
+                    }
+                    else if(tmp == false){
+                        String hastatc = t1.getText().toString();
+                        List<String> list = vt2.randevuAra(hastatc);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(YoneticiActivity.this, android.R.layout.simple_list_item_1,android.R.id.text1,list);
+                        lv.setAdapter(adapter);
+                        if (t1.length() == 0)
+                            randevuListele();
+                    }
+
+
+                }catch(Exception ex){
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
     }
@@ -138,14 +181,14 @@ public class YoneticiActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             vt2.guncelleRandevu(tmpId,t2.getText().toString(),t3.getText().toString(),t4.getText().toString(),t5.getText().toString(),t6.getText().toString());
-                            doktorListele();
+                            randevuListele();
                         }
                     });
                     builder.setPositiveButton("SİL", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             vt2.silRandevuKayit(tmpId);
-                            doktorListele();
+                            randevuListele();
                         }
                     });
                     builder.create().show();
@@ -159,8 +202,8 @@ public class YoneticiActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(YoneticiActivity.this, android.R.layout.simple_list_item_1,android.R.id.text1,list);
         lv.setAdapter(adapter);
     }
-    public void doktorListele(){
-        List<String> list = vt2.doktorListele();
+    public void randevuListele(){
+        List<String> list = vt2.randevuListeGetir();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(YoneticiActivity.this, android.R.layout.simple_list_item_1,android.R.id.text1,list);
         lv.setAdapter(adapter);
     }
